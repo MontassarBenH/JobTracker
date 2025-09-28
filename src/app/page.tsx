@@ -14,8 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Users, Edit, Trash, Plus, ChevronDown, ChevronUp } from "lucide-react";
-
+import { Calendar, Clock, Users, Edit, Trash, Plus, ChevronDown, ChevronUp, Bell, Send, CheckCircle2 } from "lucide-react";
 // Types
 interface Interview {
   id: string;
@@ -44,7 +43,171 @@ interface JobApplication {
   notes: string;
   interviews: Interview[];
   offerDetails: OfferDetails;
+  lastFollowUp?: string;
 }
+
+const INTERVIEW_PREP: Record<string, { checklist: string[]; links?: string[] }> = {
+  Technical: {
+    checklist: [
+      "Identify weak patterns (graphs, DP, trees) and drill them first",
+      "Practice aloud: restate, constraints, brute force, optimize, test",
+      "Use pattern playbook: two-pointers, sliding window, prefix/suffix, union-find, heap, sweep line",
+      "Track time/space and tradeoffs for each solution",
+      "Write unit-style tests for edge cases (empty, single, dupes, extremes)",
+      "Review language-specific pitfalls (overflow, mutability, references)",
+      "Refresh core CS: complexity table, sorting, hashing, recursion vs iteration",
+      "Do timed mocks and analyze misses (speed vs. accuracy vs. comms)",
+      "Prepare 2–3 concise project deep dives with metrics and impact",
+      "Verify dev setup for live coding (editor, runtime, tests)"
+    ],
+    links: [
+      "https://www.techinterviewhandbook.org/",
+      "https://leetcode.com/",
+      "https://neetcode.io/roadmap",
+      "https://www.hackerrank.com/",
+      "https://github.com/jwasham/coding-interview-university",
+      "https://interviewing.io/"
+    ]
+  },
+
+  "System Design": {
+    checklist: [
+      "Open with requirements: goals, non-goals, scale (QPS, storage, latency), SLA",
+      "Propose high-level diagram: client, API, services, DBs, cache, queue, storage",
+      "Choose data models (SQL vs NoSQL) and justify with access patterns",
+      "Plan scaling: sharding/partitioning, replication, read/write paths",
+      "Add reliability: retries, idempotency, circuit breakers, backpressure",
+      "Latency plan: caching layers, indexes, CQRS, pagination, precompute",
+      "State tradeoffs (CAP, consistency models, exactly-once vs at-least-once)",
+      "Observability: metrics, logs, tracing, SLOs, alerts, dashboards",
+      "Bottlenecks and growth: where it breaks first and how you’d evolve it",
+      "Security & privacy basics: authn/z, secrets, PII handling, rate limits"
+    ],
+    links: [
+      "https://github.com/donnemartin/system-design-primer",
+      "https://hellointerview.com/learn/system-design/in-a-hurry/introduction",
+      "https://www.pragmaticengineer.com/preparing-for-the-systems-design-and-coding-interviews/",
+      "https://martin.kleppmann.com/ddia.html"
+    ]
+  },
+
+  Behavioral: {
+    checklist: [
+      "Map 6–8 STAR stories to common themes (impact, conflict, failure, leadership, ownership, ambiguity)",
+      "Attach numbers to results (revenue, latency, costs, adoption, uptime)",
+      "Show learning loops: mistake → action → changed behavior",
+      "Mirror company values with authentic examples, not buzzwords",
+      "Prep 5 sharp questions for the team, product, and roadmap",
+      "Practice concise delivery (2–3 minutes per story) and active listening",
+      "Have a clear motivation narrative for the role and company",
+      "Plan compensation and location constraints talking points"
+    ],
+    links: [
+      "https://www.techinterviewhandbook.org/behavioral-interview/",
+      "https://www.themuse.com/advice/star-interview-method"
+    ]
+  },
+
+  "Product Sense": {
+    checklist: [
+      "Frame with a product method (e.g., CIRCLES): users, needs, goals, constraints",
+      "Define target user and JTBD; map top pains and current alternatives",
+      "Propose solutions with tradeoffs; prioritize by impact x effort",
+      "Define success metrics (activation, retention, NPS, revenue) and guardrails",
+      "Think go-to-market, risks, and ethical considerations",
+      "Run one concrete example: user flow + edge cases",
+      "Add v1, v2 roadmap and experiment ideas (A/Bs, surveys, usability tests)"
+    ],
+    links: [
+      "https://www.tryexponent.com/product-management",
+      "https://www.reforge.com/blog/product-sense",
+      "https://www.amazon.com/Decode-Conquer-Answers-Product-Management/dp/0998120448"
+    ]
+  },
+
+  "Case Study": {
+    checklist: [
+      "Clarify scope, objective, constraints, and timeline before solving",
+      "Choose a fitting structure (profitability, growth, market entry) then adapt",
+      "State assumptions with ranges; sanity-check with quick math",
+      "Build a simple model; pressure-test sensitivity and risks",
+      "Synthesize findings and clear recommendation with next steps",
+      "Prepare slides that tell a story: problem → options → decision → impact"
+    ],
+    links: [
+      "https://www.caseinterview.com/",
+      "https://www.strategycase.com/",
+      "https://www.firmsconsulting.com/"
+    ]
+  },
+
+  "Portfolio Review": {
+    checklist: [
+      "Curate 3–5 strongest projects; each with problem, constraints, process, outcome",
+      "Show iterations: early mocks → usability findings → final designs",
+      "Explain tradeoffs and rejected alternatives",
+      "Quantify impact (conversion, time-on-task, error rate, revenue)",
+      "Prepare interactive prototypes and make links load fast",
+      "Rehearse 10–12 minute walkthrough and a 2-minute TL;DR",
+      "Add a ‘what I’d improve next’ slide for each project"
+    ],
+    links: [
+      "https://www.nngroup.com/articles/ux-portfolio/",
+      "https://www.coursera.org/specializations/ux-design",
+      "https://dribbble.com/"
+    ]
+  },
+
+  Statistics: {
+    checklist: [
+      "Recall core stats: distributions, CLT, CI, p-values, effect size, power",
+      "Know A/B testing end-to-end: randomization, sample size, metrics, pitfalls",
+      "Explain ML basics plainly: bias-variance, regularization, cross-validation",
+      "SQL fluency: joins, GROUP BY, window functions, subqueries, CTEs",
+      "Practice experiment debugging (peeking, novelty, seasonality, SRM)",
+      "Prepare 2–3 analytics stories with business outcomes"
+    ],
+    links: [
+      "https://www.stat.cmu.edu/~cshalizi/ADAfaEPoV/",
+      "https://www.statquest.org/",
+      "https://www.mode.com/sql-tutorial",
+      "https://sqlbolt.com/",
+      "https://www.statlearning.com/"
+    ]
+  },
+
+  "Sales Pitch": {
+    checklist: [
+      "Research prospect: industry metrics, current stack, likely pains",
+      "Discovery first: 5–7 probing questions to quantify pain and urgency",
+      "Tailor demo to 2–3 critical pains; show outcomes, not features",
+      "Handle top objections with proof (case studies, ROI math, social proof)",
+      "Discuss pricing with value framing; anchor and present options",
+      "Define clear next step: pilot scope, timeline, success criteria"
+    ],
+    links: [
+      "https://www.hubspot.com/sales/sales-process",
+      "https://www.gong.io/blog/",
+      "https://meddicc.com/what-is-meddicc/"
+    ]
+  },
+
+  "Role Play": {
+    checklist: [
+      "Stay in role; keep the conversation natural and goal-oriented",
+      "Use active listening and summarize back to confirm understanding",
+      "Ask layered questions (open → specific → confirm)",
+      "Negotiate with interests, not positions; trade, don’t concede",
+      "Manage time: discovery, solution, objections, close",
+      "Close with a crisp recap and agreed next action"
+    ],
+    links: [
+      "https://www.blackboxthinking.com/never-split-the-difference-chris-voss",
+      "https://www.cruciallearning.com/books/crucial-conversations/",
+      "https://hbr.org/2016/06/the-elements-of-good-judgment"
+    ]
+  }
+};
 
 // Role templates for interview types
 const ROLE_TEMPLATES: Record<string, string[]> = {
@@ -54,6 +217,17 @@ const ROLE_TEMPLATES: Record<string, string[]> = {
   data_scientist: ["Technical", "Statistics", "Behavioral"],
   sales: ["Sales Pitch", "Role Play", "Behavioral"],
 };
+
+const needsFollowUp = (app: JobApplication, days: number = 14): boolean => {
+  if (app.status === 'rejected' || app.status === 'accepted') {
+    return false;
+  }
+  
+  const lastUpdate = app.lastFollowUp || app.dateApplied;
+  const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(lastUpdate).getTime()) / (1000 * 60 * 60 * 24));
+  return daysSinceUpdate >= days;
+};
+
 
 const STATUS_COLORS: Record<string, string> = {
   applied: "bg-blue-100 text-blue-800",
@@ -160,6 +334,9 @@ export default function JobApplicationTracker() {
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
   const [isFormExpanded, setIsFormExpanded] = useState(false);
   const companyInputRef = useRef<HTMLInputElement>(null);
+  const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
+  const [hoveredApplication, setHoveredApplication] = useState<JobApplication | null>(null);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -225,6 +402,29 @@ export default function JobApplicationTracker() {
       }));
     }
   };
+
+  const openApplicationOverlay = (app: JobApplication) => {
+  setSelectedApplication(app);
+};
+
+const closeApplicationOverlay = () => {
+  setSelectedApplication(null);
+};
+
+const handleMouseEnter = (app: JobApplication) => {
+  const timeout = setTimeout(() => {
+    setHoveredApplication(app);
+  }, 500);
+  setHoverTimeout(timeout);
+};
+
+const handleMouseLeave = () => {
+  if (hoverTimeout) {
+    clearTimeout(hoverTimeout);
+  }
+  setHoverTimeout(null);
+  setHoveredApplication(null);
+};
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -345,6 +545,28 @@ export default function JobApplicationTracker() {
     });
   };
 
+  const handleFollowUp = (app: JobApplication) => {
+  const subject = encodeURIComponent(`Following up on ${app.role} application`);
+  const body = encodeURIComponent(`Hi,
+
+I wanted to follow up on my application for the ${app.role} position that I submitted on ${new Date(app.dateApplied).toLocaleDateString()}. 
+
+I'm very interested in this opportunity and would love to discuss how my skills and experience align with your team's needs.
+
+Thank you for your time and consideration.
+
+Best regards,
+[Your Name]`);
+  
+  // Open Outlook with pre-filled email
+  window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+  
+  // Mark as followed up
+  setApplications(applications.map(application => 
+    application.id === app.id ? { ...application, lastFollowUp: new Date().toISOString().split("T")[0] } : application
+  ));
+};
+
   // Start editing
   const startEditing = (app: JobApplication) => {
     setNewApplication({
@@ -426,6 +648,7 @@ export default function JobApplicationTracker() {
   const totalApplications = applications.length;
   const interviewingCount = groupedApplications.interviewing?.length || 0;
   const rejectedCount = groupedApplications.rejected?.length || 0;
+  const followUpCount = applications.filter(app => needsFollowUp(app, 14)).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 md:p-8">
@@ -467,6 +690,17 @@ export default function JobApplicationTracker() {
               </div>
               <div className="rounded-full bg-red-100 p-3">
                 <Trash className="h-6 w-6 text-red-600" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-gray-500">Need Follow-up</p>
+                <p className="text-2xl font-bold">{followUpCount}</p>
+              </div>
+              <div className="rounded-full bg-orange-100 p-3">
+                <Bell className="h-6 w-6 text-orange-600" />
               </div>
             </CardContent>
           </Card>
@@ -775,6 +1009,46 @@ export default function JobApplicationTracker() {
           )}
         </Card>
 
+        {applications.filter(app => needsFollowUp(app, 14)).length > 0 && (
+  <Card className="mb-8 border-orange-200 bg-orange-50">
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2 text-orange-800">
+        <Bell className="h-5 w-5" />
+        Follow-up Queue ({applications.filter(app => needsFollowUp(app, 14)).length})
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-3">
+        {applications
+          .filter(app => needsFollowUp(app, 14))
+          .map(app => {
+            const lastUpdate = app.lastFollowUp || app.dateApplied;
+            const daysSince = Math.floor((new Date().getTime() - new Date(lastUpdate).getTime()) / (1000 * 60 * 60 * 24));
+            
+            return (
+              <div key={app.id} className="flex items-center justify-between rounded-lg bg-white p-4 shadow-sm">
+                <div>
+                  <div className="font-medium">{app.role} at {app.company}</div>
+                  <div className="text-sm text-gray-600">
+                    {daysSince} days since {app.lastFollowUp ? 'last follow-up' : 'application'}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => handleFollowUp(app)}  // Change this line
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Follow-up
+                </Button>
+              </div>
+            );
+          })}
+      </div>
+    </CardContent>
+  </Card>
+)}
+
         {/* Applications List */}
         <div>
           <h2 className="mb-6 text-2xl font-bold text-gray-800">My Applications</h2>
@@ -803,7 +1077,13 @@ export default function JobApplicationTracker() {
                     </div>
                     <div className="space-y-4">
                       {apps.map((app) => (
-                        <Card key={app.id} className="flex flex-col">
+                        <Card 
+                          key={app.id} 
+                          className="flex flex-col hover:shadow-lg transition-shadow cursor-pointer"
+                          onMouseEnter={() => handleMouseEnter(app)}
+                          onMouseLeave={handleMouseLeave}
+                          onClick={() => openApplicationOverlay(app)}
+                        >
                           <CardHeader className="pb-3">
                             <div className="flex items-start justify-between">
                               <div>
@@ -830,9 +1110,10 @@ export default function JobApplicationTracker() {
                                       href={app.jobUrl} 
                                       target="_blank" 
                                       rel="noopener noreferrer"
-                                      className="text-sm text-blue-600 hover:underline"
+                                      className="text-sm text-blue-600 hover:underline break-all block"
+                                      title={app.jobUrl}
                                     >
-                                      {app.jobUrl}
+                                      {app.jobUrl.length > 50 ? `${app.jobUrl.substring(0, 50)}...` : app.jobUrl}
                                     </a>
                                   </div>
                                 )}
@@ -868,6 +1149,40 @@ export default function JobApplicationTracker() {
                                               </span>
                                             </div>
                                           )}
+
+                                          {/* Prep Checklist Section */}
+                                              {INTERVIEW_PREP[interview.type] && (
+                                                <div className="mt-3 mb-3 rounded bg-blue-50 p-3">
+                                                  <div className="flex items-center mb-2">
+                                                    <CheckCircle2 className="mr-1 h-4 w-4 text-blue-600" />
+                                                    <span className="font-medium text-blue-800 text-sm">Prep Checklist</span>
+                                                  </div>
+                                                  <ul className="space-y-1 text-sm text-blue-700">
+                                                    {INTERVIEW_PREP[interview.type].checklist.map((item, idx) => (
+                                                      <li key={idx} className="flex items-start">
+                                                        <span className="mr-2 text-blue-400">•</span>
+                                                        {item}
+                                                      </li>
+                                                    ))}
+                                                  </ul>
+                                                  {INTERVIEW_PREP[interview.type].links && (
+                                                    <div className="mt-2 pt-2 border-t border-blue-200">
+                                                      <div className="text-xs text-blue-600 mb-1">Helpful Resources:</div>
+                                                      {INTERVIEW_PREP[interview.type].links?.map((link, idx) => (
+                                                          <a
+                                                            key={idx}
+                                                            href={link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block text-xs text-blue-600 hover:text-blue-800 underline mb-1"
+                                                          >
+                                                            {link}
+                                                          </a>
+                                                        ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              )}
                                           
                                           {/* Notes */}
                                           {interview.notes && (
@@ -940,7 +1255,10 @@ export default function JobApplicationTracker() {
                                 variant="ghost"
                                 size="sm"
                                 className="h-8 px-2"
-                                onClick={() => toggleCardExpansion(app.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent card click
+                                  toggleCardExpansion(app.id);
+                                }}
                               >
                                 {expandedCards[app.id] ? (
                                   <>
@@ -959,7 +1277,10 @@ export default function JobApplicationTracker() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8"
-                                  onClick={() => startEditing(app)}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); 
+                                    startEditing(app);
+                                  }}
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -967,7 +1288,10 @@ export default function JobApplicationTracker() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 text-red-600 hover:text-red-700"
-                                  onClick={() => deleteApplication(app.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent card click
+                                    deleteApplication(app.id);
+                                  }}
                                 >
                                   <Trash className="h-4 w-4" />
                                 </Button>
@@ -982,6 +1306,193 @@ export default function JobApplicationTracker() {
               })}
             </div>
           )}
+
+           {/* Hover Preview Tooltip */}
+              {hoveredApplication && (
+                <div className="fixed inset-0 pointer-events-none z-40">
+                  <div className="absolute top-4 right-4 bg-white rounded-lg shadow-xl border p-4 max-w-sm">
+                    <div className="font-medium">{hoveredApplication.role}</div>
+                    <div className="text-sm text-gray-600">{hoveredApplication.company}</div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      {hoveredApplication.interviews.length} interviews • Applied {new Date(hoveredApplication.dateApplied).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              )}
+          
+           {/* Full Application Overlay */}
+            {selectedApplication && (
+              <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+                    <div>
+                      <h2 className="text-2xl font-bold">{selectedApplication.role}</h2>
+                      <p className="text-gray-600">{selectedApplication.company}</p>
+                    </div>
+                    <Button variant="ghost" onClick={closeApplicationOverlay}>
+                      ×
+                    </Button>
+                  </div>
+                  
+                  <div className="p-6 space-y-6">
+                      {/* Basic application info */}
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Applied: {new Date(selectedApplication.dateApplied).toLocaleDateString()}
+                      </div>
+
+                      {/* Job URL */}
+                      {selectedApplication.jobUrl && (
+                        <div>
+                          <h4 className="text-sm font-medium">Job URL</h4>
+                          <a 
+                            href={selectedApplication.jobUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:underline break-all block"
+                            title={selectedApplication.jobUrl}
+                          >
+                            {selectedApplication.jobUrl}
+                          </a>
+                        </div>
+                      )}
+                      
+                      {/* Interviews */}
+                      {selectedApplication.interviews.length > 0 && (
+                        <div>
+                          <h4 className="mb-2 flex items-center text-sm font-medium">
+                            <Users className="mr-2 h-4 w-4" />
+                            Interviews
+                          </h4>
+                          <div className="space-y-3">
+                            {selectedApplication.interviews.map((interview) => (
+                              <div key={interview.id} className="rounded border border-gray-200 p-3 overflow-hidden">
+                                {/* Interview Type */}
+                                <div className="font-medium text-gray-900 mb-2">
+                                  {interview.type}
+                                </div>
+                                
+                                {/* Date and Time */}
+                                {interview.date && (
+                                  <div className="flex items-center text-gray-500 text-sm mb-2">
+                                    <Clock className="mr-1 h-3 w-3 flex-shrink-0" />
+                                    <span>
+                                      {new Date(interview.date).toLocaleDateString()}
+                                      {interview.time && (
+                                        <span className="ml-2">
+                                          at {new Date(`2000-01-01T${interview.time}`).toLocaleTimeString([], { 
+                                            hour: '2-digit', 
+                                            minute: '2-digit' 
+                                          })}
+                                        </span>
+                                      )}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Prep Checklist Section */}
+                                {INTERVIEW_PREP[interview.type] && (
+                                  <div className="mt-3 mb-3 rounded bg-blue-50 p-3">
+                                    <div className="flex items-center mb-2">
+                                      <CheckCircle2 className="mr-1 h-4 w-4 text-blue-600" />
+                                      <span className="font-medium text-blue-800 text-sm">Prep Checklist</span>
+                                    </div>
+                                    <ul className="space-y-1 text-sm text-blue-700">
+                                      {INTERVIEW_PREP[interview.type].checklist.map((item, idx) => (
+                                        <li key={idx} className="flex items-start">
+                                          <span className="mr-2 text-blue-400">•</span>
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                    {INTERVIEW_PREP[interview.type].links && (
+                                      <div className="mt-2 pt-2 border-t border-blue-200">
+                                        <div className="text-xs text-blue-600 mb-1">Helpful Resources:</div>
+                                        {INTERVIEW_PREP[interview.type].links?.map((link, idx) => (
+                                          <a
+                                            key={idx}
+                                            href={link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block text-xs text-blue-600 hover:text-blue-800 underline mb-1"
+                                          >
+                                            {link}
+                                          </a>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {/* Notes */}
+                                {interview.notes && (
+                                  <div className="mt-2 text-sm text-gray-600 break-words">{interview.notes}</div>
+                                )}
+                                
+                                {/* Calendar Links */}
+                                          {interview.date && (
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                              <a
+                                                href={generateGoogleCalendarUrl(interview, selectedApplication.company, selectedApplication.role)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600"
+                                              >
+                                                <Calendar className="mr-1 h-3 w-3" />
+                                                Google
+                                              </a>
+                                              <a
+                                                href={generateOutlookCalendarUrl(interview, selectedApplication.company, selectedApplication.role)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center rounded bg-[#0072c6] px-2 py-1 text-xs text-white hover:bg-[#005a9e]"
+                                              >
+                                                <Calendar className="mr-1 h-3 w-3" />
+                                                Outlook
+                                              </a>
+                                              <a
+                                                href={generateAppleCalendarUrl(interview, selectedApplication.company, selectedApplication.role)}
+                                                download={`interview-${interview.id}.ics`}
+                                                className="inline-flex items-center rounded bg-black px-2 py-1 text-xs text-white hover:bg-gray-800"
+                                              >
+                                                <Calendar className="mr-1 h-3 w-3" />
+                                                Apple
+                                              </a>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                      
+                      {/* Offer Details */}
+                      {(selectedApplication.offerDetails.salary || selectedApplication.offerDetails.equity || selectedApplication.offerDetails.bonus) && (
+                        <div className="rounded bg-green-50 p-3">
+                          <h4 className="mb-1 text-sm font-medium text-green-800">Offer Details</h4>
+                          <div className="text-sm text-green-700">
+                            {selectedApplication.offerDetails.salary && <div>Salary: {selectedApplication.offerDetails.salary}</div>}
+                            {selectedApplication.offerDetails.equity && <div>Equity: {selectedApplication.offerDetails.equity}</div>}
+                            {selectedApplication.offerDetails.bonus && <div>Bonus: {selectedApplication.offerDetails.bonus}</div>}
+                            {selectedApplication.offerDetails.location && <div>Location: {selectedApplication.offerDetails.location}</div>}
+                            {selectedApplication.offerDetails.startDate && <div>Start Date: {new Date(selectedApplication.offerDetails.startDate).toLocaleDateString()}</div>}
+                            {selectedApplication.offerDetails.deadline && <div>Deadline: {new Date(selectedApplication.offerDetails.deadline).toLocaleDateString()}</div>}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Notes */}
+                      {selectedApplication.notes && (
+                        <div>
+                          <h4 className="text-sm font-medium">Notes</h4>
+                          <p className="text-sm text-gray-600">{selectedApplication.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                </div>
+              </div>
+            )}
+
         </div>
       </div>
     </div>
