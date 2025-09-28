@@ -75,6 +75,8 @@ Outlook: https://outlook.office.com/calendar/0/deeplink/compose?...
 
 Apple: generates and downloads a .ics on the fly.
 
+Licensed under the Apache License, Version 2.0.
+
 
 
 
