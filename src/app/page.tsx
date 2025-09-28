@@ -1084,13 +1084,17 @@ Best regards,
                           onMouseLeave={handleMouseLeave}
                           onClick={() => openApplicationOverlay(app)}
                         >
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <CardTitle className="text-lg">{app.role}</CardTitle>
-                                <p className="text-gray-600">{app.company}</p>
+                         <CardHeader className="pb-3">
+                            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                              <div className="min-w-0">
+                                <CardTitle className="text-lg whitespace-normal break-words hyphens-auto">
+                                  {app.role}
+                                </CardTitle>
+                                <p className="text-gray-600 whitespace-normal break-words hyphens-auto">
+                                  {app.company}
+                                </p>
                               </div>
-                              <Badge className={STATUS_COLORS[app.status]}>
+                              <Badge className={`${STATUS_COLORS[app.status]} shrink-0`}>
                                 {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                               </Badge>
                             </div>
