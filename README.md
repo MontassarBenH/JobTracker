@@ -41,3 +41,40 @@ pnpm build
 
 # preview
 pnpm start
+
+Requires Node 18+.
+
+Usage
+
+Click Add New Application.
+
+Paste a job URL to auto-fill where possible.
+
+Pick a Role Template to pre-seed interview stages.
+
+Add interview dates and times; export to your calendar.
+
+The Follow-up Queue surfaces apps with no updates for 14+ days. Click Send Follow-up to open an email and auto-stamp lastFollowUp.
+
+LocalStorage keys:
+
+jobApplications
+
+companies
+
+Follow-up logic
+needsFollowUp(app, days = 14)
+// true if app is not rejected/accepted and
+// days since (lastFollowUp || dateApplied) >= days
+
+Calendar export
+
+Google: https://calendar.google.com/calendar/render?action=TEMPLATE...
+
+Outlook: https://outlook.office.com/calendar/0/deeplink/compose?...
+
+Apple: generates and downloads a .ics on the fly.
+
+
+
+
