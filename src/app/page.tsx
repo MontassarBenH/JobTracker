@@ -409,6 +409,18 @@ export default function JobApplicationTracker() {
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [hoveredApplication, setHoveredApplication] = useState<JobApplication | null>(null);
   const [hoverTimeout, setHoverTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      // close if click happens outside the search container
+      const target = e.target as HTMLElement;
+      if (!target.closest?.(".search-container")) setShowSearchResults(false);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
 
 
@@ -493,6 +505,42 @@ const handleMouseEnter = (app: JobApplication) => {
   }, 500);
   setHoverTimeout(timeout);
 };
+
+// tiny helpers
+const norm = (s: string) => (s || "").toLowerCase().trim();
+
+const matches = (app: JobApplication, q: string) => {
+  const n = norm(q);
+  if (!n) return false;
+  return (
+    norm(app.company).includes(n) ||
+    norm(app.role).includes(n) ||
+    norm(app.status).includes(n) ||
+    norm(app.notes).includes(n) ||
+    norm(app.jobUrl).includes(n)
+  );
+};
+
+// simple scoring to rank better hits
+const score = (app: JobApplication, q: string) => {
+  const n = norm(q);
+  const fields = [
+    [app.company, 3],
+    [app.role, 3],
+    [app.status, 2],
+    [app.notes, 1],
+    [app.jobUrl, 1],
+  ] as const;
+  return fields.reduce((acc, [val, w]) => acc + (norm(val).includes(n) ? w : 0), 0);
+};
+
+// derived results
+const searchResults = searchQuery
+  ? [...applications]
+      .filter(a => matches(a, searchQuery))
+      .sort((a, b) => score(b, searchQuery) - score(a, searchQuery))
+      .slice(0, 8)
+  : [];
 
 const handleMouseLeave = () => {
   if (hoverTimeout) {
@@ -1132,6 +1180,78 @@ Best regards,
     </CardContent>
   </Card>
 )}
+
+      {/* Search */}
+      <div className="mb-6 relative">
+        <div className="flex gap-2 items-center">
+          <Input
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSearchResults(true);
+            }}
+            onFocus={() => setShowSearchResults(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setShowSearchResults(false);
+                (e.target as HTMLInputElement).blur();
+              }
+              if (e.key === "Enter" && searchResults.length > 0) {
+                openApplicationOverlay(searchResults[0]);
+              }
+            }}
+            placeholder="Search by company, role, status, notes, or URL"
+            className="w-full"
+          />
+          {searchQuery && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                setShowSearchResults(false);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </div>
+
+        {/* Results dropdown */}
+        {showSearchResults && searchQuery && (
+          <div className="absolute z-30 mt-2 w-full rounded-md border bg-white shadow-lg max-h-80 overflow-auto">
+            {searchResults.length === 0 ? (
+              <div className="p-3 text-sm text-gray-500">No matches</div>
+            ) : (
+              <ul className="divide-y">
+                {searchResults.map((app) => (
+                  <li
+                    key={app.id}
+                    className="p-3 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => openApplicationOverlay(app)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{app.role}</div>
+                        <div className="text-sm text-gray-600 truncate">{app.company}</div>
+                        <div className="text-xs text-gray-500 mt-1 truncate">
+                          {new Date(app.dateApplied).toLocaleDateString()} • {app.status}
+                        </div>
+                      </div>
+                      <Badge className={STATUS_COLORS[app.status]}>
+                        {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
+                      </Badge>
+                    </div>
+                    {app.notes && (
+                      <div className="mt-1 text-xs text-gray-500 line-clamp-2">{app.notes}</div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+
 
         {/* Applications List */}
         <div>
