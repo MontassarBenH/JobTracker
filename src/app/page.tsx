@@ -70,6 +70,69 @@ const INTERVIEW_PREP: Record<string, { checklist: string[]; links?: string[] }> 
     ]
   },
 
+  "Design Review": {
+  checklist: [
+    "Prepare 2-3 detailed engineering projects with design process, constraints, and outcomes",
+    "Review engineering fundamentals: statics, dynamics, materials, thermodynamics",
+    "Practice explaining technical concepts to non-technical stakeholders",
+    "Prepare for design trade-off discussions (cost vs performance vs reliability)",
+    "Review relevant codes, standards, and regulations (ASME, IEEE, OSHA, etc.)",
+    "Bring portfolio with CAD drawings, schematics, or technical diagrams",
+    "Practice failure analysis: root cause identification and prevention strategies",
+    "Prepare examples of design optimization and iterative improvement",
+    "Review project management experience: timeline, budget, team coordination",
+    "Understand company's products, manufacturing processes, and engineering challenges"
+  ],
+  links: [
+    "https://www.asme.org/career-education/early-career-engineers",
+    "https://www.ieee.org/membership/students/index.html",
+    "https://www.engineeringtoolbox.com/",
+    "https://www.autodesk.com/education/home"
+  ]
+},
+
+"Process Review": {
+  checklist: [
+    "Map out end-to-end processes you've designed, optimized, or managed",
+    "Quantify improvements: efficiency gains, cost reduction, quality metrics",
+    "Review process control fundamentals: PID controllers, feedback loops",
+    "Prepare lean manufacturing and Six Sigma examples if applicable",
+    "Review safety protocols: HAZOP, risk assessment, safety instrumentation",
+    "Practice explaining process flow diagrams and P&IDs",
+    "Prepare examples of troubleshooting and process optimization",
+    "Review regulatory compliance: FDA, EPA, OSHA requirements",
+    "Understand supply chain and logistics impact on processes",
+    "Prepare for scale-up discussions: pilot to production challenges"
+  ],
+  links: [
+    "https://www.aiche.org/resources/career/career-resources",
+    "https://www.isixsigma.com/",
+    "https://www.lean.org/",
+    "https://www.nist.gov/manufacturing-extension-partnership"
+  ]
+},
+
+"Project Review": {
+  checklist: [
+    "Prepare 2-3 major projects: scope, timeline, budget, deliverables, outcomes",
+    "Review project management methodologies: waterfall, agile, critical path",
+    "Practice stakeholder management examples: clients, contractors, regulators",
+    "Quantify project success: on-time delivery, budget adherence, performance metrics",
+    "Review risk management: identification, mitigation, contingency planning",
+    "Prepare examples of problem-solving during project execution",
+    "Review relevant engineering standards and building codes",
+    "Practice presenting technical information to diverse audiences",
+    "Prepare examples of cross-functional team leadership",
+    "Review environmental impact and sustainability considerations"
+  ],
+  links: [
+    "https://www.pmi.org/",
+    "https://www.asce.org/career-and-growth/",
+    "https://www.nspe.org/resources/career-center",
+    "https://www.constructionexec.com/"
+  ]
+},
+
   "System Design": {
     checklist: [
       "Open with requirements: goals, non-goals, scale (QPS, storage, latency), SLA",
@@ -216,6 +279,14 @@ const ROLE_TEMPLATES: Record<string, string[]> = {
   designer: ["Portfolio Review", "Design Exercise", "Behavioral"],
   data_scientist: ["Technical", "Statistics", "Behavioral"],
   sales: ["Sales Pitch", "Role Play", "Behavioral"],
+  electrical_engineer: ["Technical", "Design Review", "Behavioral"],
+  mechanical_engineer: ["Technical", "Design Review", "Behavioral"],
+  civil_engineer: ["Technical", "Project Review", "Behavioral"],
+  chemical_engineer: ["Technical", "Process Review", "Behavioral"],
+  aerospace_engineer: ["Technical", "Design Review", "Behavioral"],
+  biomedical_engineer: ["Technical", "Design Review", "Behavioral"],
+  industrial_engineer: ["Technical", "Process Review", "Behavioral"],
+  environmental_engineer: ["Technical", "Project Review", "Behavioral"],
 };
 
 const needsFollowUp = (app: JobApplication, days: number = 14): boolean => {
@@ -337,6 +408,8 @@ export default function JobApplicationTracker() {
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [hoveredApplication, setHoveredApplication] = useState<JobApplication | null>(null);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+
+
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -831,13 +904,21 @@ Best regards,
                       <SelectTrigger>
                         <SelectValue placeholder="Select a role template" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="software_engineer">Software Engineer</SelectItem>
-                        <SelectItem value="product_manager">Product Manager</SelectItem>
-                        <SelectItem value="designer">Designer</SelectItem>
-                        <SelectItem value="data_scientist">Data Scientist</SelectItem>
-                        <SelectItem value="sales">Sales</SelectItem>
-                      </SelectContent>
+                     <SelectContent>
+                      <SelectItem value="software_engineer">Software Engineer</SelectItem>
+                      <SelectItem value="product_manager">Product Manager</SelectItem>
+                      <SelectItem value="designer">Designer</SelectItem>
+                      <SelectItem value="data_scientist">Data Scientist</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="electrical_engineer">Electrical Engineer</SelectItem>
+                      <SelectItem value="mechanical_engineer">Mechanical Engineer</SelectItem>
+                      <SelectItem value="civil_engineer">Civil Engineer</SelectItem>
+                      <SelectItem value="chemical_engineer">Chemical Engineer</SelectItem>
+                      <SelectItem value="aerospace_engineer">Aerospace Engineer</SelectItem>
+                      <SelectItem value="biomedical_engineer">Biomedical Engineer</SelectItem>
+                      <SelectItem value="industrial_engineer">Industrial Engineer</SelectItem>
+                      <SelectItem value="environmental_engineer">Environmental Engineer</SelectItem>
+                    </SelectContent>
                     </Select>
                     <p className="mt-1 text-sm text-gray-500">
                       Select a role to auto-populate interview types
