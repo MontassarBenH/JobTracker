@@ -9,9 +9,7 @@ const withPWAWrap = withPWA({
   register: true,            // auto-register on the client
   skipWaiting: true,         // activate new SW immediately
   disable: isDev,            // off in dev, on in prod
-  fallbacks: { document: '/offline.html' }, // optional offline page in /public
-  // If TS yells about this type, you can cast as any or extract to a .js file.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fallbacks: { document: '/offline.html' }, 
   runtimeCaching: [
     // Next’s hashed build assets
     {
@@ -36,7 +34,6 @@ const withPWAWrap = withPWA({
 });
 
 const nextConfig: NextConfig = {
-  // your regular Next config goes here
   reactStrictMode: true,
 };
 

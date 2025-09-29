@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import KanbanBoard from "@/components/ui/KanbanBoard";
 import {
   Select,
   SelectContent,
@@ -407,7 +408,7 @@ export default function JobApplicationTracker() {
   const companyInputRef = useRef<HTMLInputElement>(null);
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [hoveredApplication, setHoveredApplication] = useState<JobApplication | null>(null);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [hoverTimeout, setHoverTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
 
 
@@ -424,6 +425,8 @@ export default function JobApplicationTracker() {
       setCompanies(JSON.parse(savedCompanies));
     }
   }, []);
+
+  
 
   // Save to localStorage when data changes
   useEffect(() => {
@@ -732,7 +735,7 @@ Best regards,
         </header>
 
         {/* Stats Header */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardContent className="flex items-center justify-between p-4">
               <div>
@@ -1143,254 +1146,20 @@ Best regards,
               <p className="mt-1 text-gray-500">Add your first job application to get started</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {STATUS_ORDER.map((status) => {
-                const apps = groupedApplications[status] || [];
-                return (
-                  <div key={status} className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">
-                        {STATUS_LABELS[status]} ({apps.length})
-                      </h3>
-                      <Badge className={STATUS_COLORS[status]}>
-                        {apps.length}
-                      </Badge>
-                    </div>
-                    <div className="space-y-4">
-                      {apps.map((app) => (
-                        <Card 
-                          key={app.id} 
-                          className="flex flex-col hover:shadow-lg transition-shadow cursor-pointer"
-                          onMouseEnter={() => handleMouseEnter(app)}
-                          onMouseLeave={handleMouseLeave}
-                          onClick={() => openApplicationOverlay(app)}
-                        >
-                         <CardHeader className="pb-3">
-                            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
-                              <div className="min-w-0">
-                                <CardTitle className="text-lg whitespace-normal break-words hyphens-auto">
-                                  {app.role}
-                                </CardTitle>
-                                <p className="text-gray-600 whitespace-normal break-words hyphens-auto">
-                                  {app.company}
-                                </p>
-                              </div>
-                              <Badge className={`${STATUS_COLORS[app.status]} shrink-0`}>
-                                {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
-                              </Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="flex-grow">
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Calendar className="mr-2 h-4 w-4" />
-                              Applied: {new Date(app.dateApplied).toLocaleDateString()}
-                            </div>
-                            
-                            {expandedCards[app.id] && (
-                              <div className="mt-4 space-y-4">
-                                {app.jobUrl && (
-                                  <div>
-                                    <h4 className="text-sm font-medium">Job URL</h4>
-                                    <a 
-                                      href={app.jobUrl} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-sm text-blue-600 hover:underline break-all block"
-                                      title={app.jobUrl}
-                                    >
-                                      {app.jobUrl.length > 50 ? `${app.jobUrl.substring(0, 50)}...` : app.jobUrl}
-                                    </a>
-                                  </div>
-                                )}
-                                
-                                {app.interviews.length > 0 && (
-                                  <div>
-                                    <h4 className="mb-2 flex items-center text-sm font-medium">
-                                      <Users className="mr-2 h-4 w-4" />
-                                      Interviews
-                                    </h4>
-                                    <div className="space-y-3">
-                                      {app.interviews.map((interview) => (
-                                        <div key={interview.id} className="rounded border border-gray-200 p-3 overflow-hidden">
-                                          {/* Interview Type - Always on its own line */}
-                                          <div className="font-medium text-gray-900 mb-2">
-                                            {interview.type}
-                                          </div>
-                                          
-                                          {/* Date and Time - On separate line */}
-                                          {interview.date && (
-                                            <div className="flex items-center text-gray-500 text-sm mb-2">
-                                              <Clock className="mr-1 h-3 w-3 flex-shrink-0" />
-                                              <span>
-                                                {new Date(interview.date).toLocaleDateString()}
-                                                {interview.time && (
-                                                  <span className="ml-2">
-                                                    at {new Date(`2000-01-01T${interview.time}`).toLocaleTimeString([], { 
-                                                      hour: '2-digit', 
-                                                      minute: '2-digit' 
-                                                    })}
-                                                  </span>
-                                                )}
-                                              </span>
-                                            </div>
-                                          )}
-
-                                          {/* Prep Checklist Section */}
-                                              {INTERVIEW_PREP[interview.type] && (
-                                                <div className="mt-3 mb-3 rounded bg-blue-50 p-3">
-                                                  <div className="flex items-center mb-2">
-                                                    <CheckCircle2 className="mr-1 h-4 w-4 text-blue-600" />
-                                                    <span className="font-medium text-blue-800 text-sm">Prep Checklist</span>
-                                                  </div>
-                                                  <ul className="space-y-1 text-sm text-blue-700">
-                                                    {INTERVIEW_PREP[interview.type].checklist.map((item, idx) => (
-                                                      <li key={idx} className="flex items-start">
-                                                        <span className="mr-2 text-blue-400">•</span>
-                                                        {item}
-                                                      </li>
-                                                    ))}
-                                                  </ul>
-                                                  {INTERVIEW_PREP[interview.type].links && (
-                                                    <div className="mt-2 pt-2 border-t border-blue-200">
-                                                      <div className="text-xs text-blue-600 mb-1">Helpful Resources:</div>
-                                                      {INTERVIEW_PREP[interview.type].links?.map((link, idx) => (
-                                                          <a
-                                                            key={idx}
-                                                            href={link}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="block text-xs text-blue-600 hover:text-blue-800 underline mb-1"
-                                                          >
-                                                            {link}
-                                                          </a>
-                                                        ))}
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              )}
-                                          
-                                          {/* Notes */}
-                                          {interview.notes && (
-                                            <div className="mt-2 text-sm text-gray-600 break-words">{interview.notes}</div>
-                                          )}
-                                          
-                                          {/* Calendar Links */}
-                                          {interview.date && (
-                                            <div className="mt-3 flex flex-wrap gap-2">
-                                              <a
-                                                href={generateGoogleCalendarUrl(interview, app.company, app.role)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600"
-                                              >
-                                                <Calendar className="mr-1 h-3 w-3" />
-                                                Google
-                                              </a>
-                                              <a
-                                                href={generateOutlookCalendarUrl(interview, app.company, app.role)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center rounded bg-[#0072c6] px-2 py-1 text-xs text-white hover:bg-[#005a9e]"
-                                              >
-                                                <Calendar className="mr-1 h-3 w-3" />
-                                                Outlook
-                                              </a>
-                                              <a
-                                                href={generateAppleCalendarUrl(interview, app.company, app.role)}
-                                                download={`interview-${interview.id}.ics`}
-                                                className="inline-flex items-center rounded bg-black px-2 py-1 text-xs text-white hover:bg-gray-800"
-                                              >
-                                                <Calendar className="mr-1 h-3 w-3" />
-                                                Apple
-                                              </a>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {(app.offerDetails.salary || app.offerDetails.equity || app.offerDetails.bonus) && (
-                                  <div className="rounded bg-green-50 p-3">
-                                    <h4 className="mb-1 text-sm font-medium text-green-800">Offer Details</h4>
-                                    <div className="text-sm text-green-700">
-                                      {app.offerDetails.salary && <div>Salary: {app.offerDetails.salary}</div>}
-                                      {app.offerDetails.equity && <div>Equity: {app.offerDetails.equity}</div>}
-                                      {app.offerDetails.bonus && <div>Bonus: {app.offerDetails.bonus}</div>}
-                                      {app.offerDetails.location && <div>Location: {app.offerDetails.location}</div>}
-                                      {app.offerDetails.startDate && <div>Start Date: {new Date(app.offerDetails.startDate).toLocaleDateString()}</div>}
-                                      {app.offerDetails.deadline && <div>Deadline: {new Date(app.offerDetails.deadline).toLocaleDateString()}</div>}
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {app.notes && (
-                                  <div>
-                                    <h4 className="text-sm font-medium">Notes</h4>
-                                    <p className="text-sm text-gray-600">{app.notes}</p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </CardContent>
-                          <div className="mt-auto border-t border-gray-100 p-2">
-                            <div className="flex justify-between">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 px-2"
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Prevent card click
-                                  toggleCardExpansion(app.id);
-                                }}
-                              >
-                                {expandedCards[app.id] ? (
-                                  <>
-                                    <ChevronUp className="mr-1 h-4 w-4" />
-                                    Less
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown className="mr-1 h-4 w-4" />
-                                    Details
-                                  </>
-                                )}
-                              </Button>
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={(e) => {
-                                    e.stopPropagation(); 
-                                    startEditing(app);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-red-600 hover:text-red-700"
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Prevent card click
-                                    deleteApplication(app.id);
-                                  }}
-                                >
-                                  <Trash className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+             <KanbanBoard
+                applications={applications}
+                onEdit={(app) => startEditing(app)}
+                onDelete={(id) => deleteApplication(id)}
+                onStatusChange={(id, newStatus) => {
+                  setApplications(prev =>
+                    prev.map(a => a.id === id ? { ...a, status: newStatus } : a)
+                  );
+                }}
+                onOpen={(app) => openApplicationOverlay(app)}
+                onHoverEnter={(app) => handleMouseEnter(app)}
+                onHoverLeave={() => handleMouseLeave()}
+              />
+            )}
 
            {/* Hover Preview Tooltip */}
               {hoveredApplication && (
